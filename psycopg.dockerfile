@@ -10,6 +10,7 @@
 FROM python:3.12-slim-bookworm AS builder
 
 ARG PSYCOPG_VERSION=3.2.5
+ARG PSYCOPG_POOL_VERSION=3.2.6
 ARG DEBIAN_FRONTEND=noninteractive
 
 ARG BUILD_PACKAGES="\
@@ -39,6 +40,18 @@ RUN set -eux \
       # Do not use a binary packge for the package being built
       --no-binary=psycopg \
       --no-binary="psycopg-c" \
+      # Do use binary packages for dependencies
+      --prefer-binary \
+      # Don't cache build files
+      --no-cache-dir \
+    && python3 -m pip wheel \
+      # Build the package at the required version
+      psycopg[pool]==${PSYCOPG_POOL_VERSION} \
+      # Output the *.whl into this directory
+      --wheel-dir wheels \
+      # Do not use a binary packge for the package being built
+      --no-binary=psycopg \
+      --no-binary="psycopg-pool" \
       # Do use binary packages for dependencies
       --prefer-binary \
       # Don't cache build files
